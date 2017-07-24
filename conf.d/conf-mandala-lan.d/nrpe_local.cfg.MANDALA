@@ -1,0 +1,129 @@
+####################### WQCG Customization ####################
+#
+# Range definitions:
+# 100-199: services that run on all servers
+# 200-499: services which are customized for specific server(s)
+# 400-599: process oriented services, like mysql or some user defined procs and daemons
+# 500-599: SNMP services
+# 600-699: services using PASSIVE check
+# 700-999: services using ssh instead of nrpe port 5666
+#
+# RANGE: 100-199 is for WQCG Services for all servers
+# Number like 103-1 means that service 103 was customized
+
+# 100 is for host-alive which does not require nrpe 
+
+# this cmd calculates total disk usage in GB for all mounted f/s
+command[101]=/usr/lib/nagios/plugins/check_uptime -u days -w 250 -c 350
+command[101-1]=/usr/lib/nagios/plugins/check_uptime.pl
+command[102]=/usr/local/sbin/check_datasize.sh
+command[103]=/usr/lib/nagios/plugins/check_disk -w 40% -c 20% -p /
+command[103-1]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /
+
+command[104]=/usr/lib/nagios/plugins/check_ntp_time -H edge-rt.mandala.lan -w 20 -c 60
+#
+# RANGE: 200-499 OS Related Customized Services for specific hosts
+# 
+command[200]=/usr/lib/nagios/plugins/check_disk -w 20% -c 5% -p /zhome/suavek
+command[201]=/usr/lib/nagios/plugins/check_disk -w 20% -c 5% -p /zhome/OracleVM/Win7
+command[202]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /backup
+command[203]=/usr/lib/nagios/plugins/check_disk -w 20% -c 5% -p /zhome/OracleVM/mintos
+command[204]=/usr/lib/nagios/plugins/check_disk -w 20% -c 5% -p /home/suavek
+# DataON RAID check
+# Samba procs
+command[206]=/usr/lib/nagios/plugins/check_procs -c 1:1 -C nmbd -p 1
+command[207]=/usr/lib/nagios/plugins/check_procs -c 1:1 -C smbd -p 1
+#logged in users
+command[208]=/usr/lib/nagios/plugins/check_users -w 5 -c 10
+command[209]=/usr/lib/nagios/plugins/check_users -w 20 -c 50
+
+# Total procs running on server
+# Light
+command[210]=/usr/lib/nagios/plugins/check_procs -w 50 -c 100
+# Medium
+command[211]=/usr/lib/nagios/plugins/check_procs -w 200 -c 400
+# Heavy
+command[212]=/usr/lib/nagios/plugins/check_procs -w 750 -c 900
+
+# check for ZOMBIES
+command[213]=/usr/lib/nagios/plugins/check_procs -w 5 -c 10 -s Z
+# software raid check
+command[214]=/usr/local/sbin/check_md_raid
+# some servers have a separate /boot
+command[215]=/usr/lib/nagios/plugins/check_disk -w 5% -c 2% -p /boot
+# customized root f/s disk space check for large disks
+command[216]=/usr/lib/nagios/plugins/check_disk -w 10% -c 5% -p /
+# database partitons
+command[217]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /db
+command[218]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /db_backup
+command[219]=/usr/lib/nagios/plugins/check_load -w 15,10,5 -c 30,25,20
+command[220]=/usr/lib/nagios/plugins/check_load -w 30,20,15 -c 50,40,30
+command[221]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /home
+command[222]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /var
+command[223]=/usr/lib/nagios/plugins/check_procs -c 1:1 -C gfy-job-daemon
+command[224]=/usr/lib/nagios/plugins/check_procs -c 1:1 -C cron -p 1
+command[225]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /var/www
+# IBM int raid
+command[226]=/usr/local/sbin/check_serveraid_drives.py
+command[227]=/usr/lib/nagios/plugins/check_procs -c 1:1 -C sge_qmaster
+command[228]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /lab
+command[229]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /data
+command[230]=/usr/local/sbin/check_quota_enhanced.pl --group --upper_cutoff 200048 --lower_cutoff 1024 --filesystem /d0 --filesystem /d1
+command[231]=/usr/lib/nagios/plugins/check_disk -w 5% -c 2% -p /nmr-export
+# check nfsd
+command[232]=/usr/lib/nagios/plugins/check_procs -c 12:24 -C nfsd -p 2
+command[233]=/usr/lib/nagios/plugins/check_smtp -H localhost
+# IMAP daemon
+command[234]=/usr/lib/nagios/plugins/check_procs -c 1: -C imapd
+# netstat -an | grep WAIT | wc -l
+command[235]=/usr/lib/nagios/plugins/check_wait.pl --cutoff 40
+#Mail scanner
+command[236]=/usr/lib/nagios/plugins/check_procs -w 20: -c 5: -C MailScanner
+#Mail scanner
+command[237]=/usr/lib/nagios/plugins/check_procs -c 1: -C clamd
+# Solaris zpool check
+command[238]=/usr/lib/nagios/plugins/check_zpools
+#wqcg backup daemon
+command[239]=/usr/lib/nagios/plugins/check_procs --argument-array=wqb2d -c 1:1 -p 1
+command[240]=/usr/lib/nagios/plugins/check_disk -w 5% -c 2% -p /dsu0
+# check for failed backups
+command[241]=/usr/local/sbin/check_failed_backups.sh
+# LDAP
+command[242]=/usr/lib/nagios/plugins/check_procs -c 1 -C slapd -p 1
+
+
+#
+# 300-399 SNMP services
+# 
+# see commands-wqcg.cfg for details of these 300-304 checks
+command[300]=check_avtech_humidity1
+command[301]=check_avtech_temp1
+command[302]=check_avtech_temp2
+command[303]=check_ud_humidity1
+command[304]=check_ud_temp1
+
+
+#
+# RANGE: 400-599 Non-OS specific procs/Services for specific hosts
+# (ie:  dbase, fileservers)
+# check_http is not done via nrpe but directly from Nagios server
+command[400]=/usr/lib/nagios/plugins/check_http
+
+command[401]=/usr/lib/nagios/plugins/check_mysql -u mysql
+command[402]=/usr/lib/nagios/plugins/check_mysql -u nagios --password='nagios' -d nagdb
+command[402-1]=/usr/lib/nagios/plugins/check_mysql -u nagios --password='nagios' 
+command[402-2]=/usr/lib/nagios/plugins/check_mysql -u nagios --password='' -d nagdb
+command[402-3]=/usr/lib/nagios/plugins/check_mysql -u confluence -p ziXeech3
+# WQCG FAILED backup check
+command[403]=/usr/local/sbin/check_failed_backups.sh
+###########################################
+# 600-699: services using PASSIVE check
+# check B server zpools
+command[600]=/usr/local/sbin/check_status_file /root/from_mirror/var/adm/zpools
+# check B server maga raids
+command[601]=/usr/local/sbin/check_status_file /root/from_mirror/var/adm/megaraid.int
+command[602]=/usr/local/sbin/check_status_file /root/from_mirror/var/adm/megaraid.ext
+# check B server wqb2d daemon
+command[603]=/usr/local/sbin/check_status_file /root/from_mirror/var/adm/wqb2d_status
+# check B server alive
+command[604]=/usr/lib/nagios/plugins/check_ping -H 192.168.1.2 -w 300,100% -c 500,100%

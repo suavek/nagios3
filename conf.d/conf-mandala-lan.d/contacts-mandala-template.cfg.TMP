@@ -1,0 +1,16 @@
+##
+# This is a generic Mandala contact 
+#
+define contact{
+       contact_name	contacts-mandala-template
+       alias 		Generic Contact for Mandala LAN
+	host_notifications_enabled	1
+        host_notification_period        24x7
+        host_notification_options       d,r
+        host_notification_commands      notify-host-by-email
+	service_notifications_enabled	1
+	service_notification_period     24x7
+        service_notification_options    w,u,c,r
+        service_notification_commands   notify-service-by-email
+	register			0
+}

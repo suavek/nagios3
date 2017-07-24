@@ -1,0 +1,577 @@
+define host{
+        use                     hosts-mandala-template
+        host_name               mintos
+        alias                   mintos - VBOX VM
+        address                 mintos.mandala.lan
+        hostgroups              subnet-192-168-2-0
+        }
+
+# Range definitions:
+# 100-199: services that run on all servers
+# 200-299: services which are customized for specific server(s)
+# 300-399: SNMP services
+# 400-499: process oriented services, like mysql or some user defined procs and daemons
+# 800-999: services using ssh instead of nrpe port 5666
+#
+# To do:
+# 1. copy this template to $NAGIOS3/objects/object-$LAB_NAME.cfg
+# 2. add host_name
+# 3. delete the "register 0" line# NOTE!  register 0 is absent in 100-199
+# as all servers should have these services! !!!
+# These are services for all WQCG servers
+#
+#
+define service {
+        use				services-mandala-template
+        service_description             100 Alive
+ 	check_command                   check-host-alive
+	host_name			 
+	register                        0
+}
+#command[101]=/usr/lib/nagios/plugins/check_uptime -u days -w 300 -c 500
+define service {
+        use				services-mandala-template
+        service_description             101 Uptime
+	check_interval			1440 ; once per 24 hrs
+ 	check_command                   check_nrpe_1arg!101
+	host_name			 
+	register                        0
+}
+#command[101-1]=/usr/lib/nagios/plugins/check_uptime.pl 
+define service {
+        use				services-mandala-template
+        service_description             101-1 Uptime
+	check_interval			1440 ; once per 24 hrs
+ 	check_command                   check_nrpe_1arg!101-1
+	host_name			 
+	register                        0
+}
+#command[102]=/usr/local/sbin/check_datasize.sh
+define service {
+        use				services-mandala-template
+        service_description             102 Total data in GB
+	check_interval			360 ; every 6 hrs
+ 	check_command                   check_nrpe_1arg!102
+	notifications_enabled		0
+	host_name			 
+	register                        0
+}
+
+# root f/s has two definitions: 
+# for non-standard servers with huge OS disk
+define service {
+        use				services-mandala-template
+        service_description             103 Root f/s free
+ 	check_command                   check_nrpe_1arg!103
+	host_name			mintos
+}
+#command[103-1]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /
+# NOTE: if you add a server to 103-1 you should excluded from 103
+# use "!" 
+define service {
+        use				services-mandala-template
+        service_description             103-1 Root f/s free
+ 	check_command                   check_nrpe_1arg!103-1
+	host_name			
+	register                        0
+}
+#command[104]=/usr/lib/nagios/plugins/check_ntp_time -H endrun5.br.harvard.edu -w 20 -c 60
+
+define service {
+        use				services-mandala-template
+        service_description             104 Time Sync
+	check_interval			60 ; every 60 mins
+ 	check_command                   check_nrpe_1arg!104
+	host_name			mintos
+}
+
+
+
+#command[200]=/usr/lib/nagios/plugins/check_disk -w 5% -c 2% -p /s0
+define service{
+	use				services-mandala-template
+        service_description             200 /s0 f/s free
+        check_command                   check_nrpe_1arg!200
+	host_name
+	register                        0
+	}
+#command[201]=/usr/lib/nagios/plugins/check_disk -w 5% -c 2% -p /d0
+define service{
+	use				services-mandala-template
+	service_description		201 /d0 f/s free
+	check_command			check_nrpe_1arg!201
+	host_name
+	register                        0
+	}
+#command[202]=/usr/lib/nagios/plugins/check_disk -w 5% -c 2% -p /d1
+define service{
+	use				services-mandala-template
+	service_description		202 /d1 f/s free
+	check_command			check_nrpe_1arg!202
+	host_name
+	register                        0
+	}
+#command[203]=/usr/local/sbin/check_megaraid ext
+define service{
+	use				services-mandala-template
+        service_description             203 megaraid-ext
+        check_command                   check_nrpe_1arg!203
+	host_name
+	register                        0
+	}
+#command[204]=/usr/local/sbin/check_megaraid int
+define service{
+	use				services-mandala-template
+        service_description             204 megaraid-int
+        check_command                   check_nrpe_1arg!204
+	host_name
+	register                        0
+	}
+#command[206]=/usr/lib/nagios/plugins/check_procs -c 1:1 -C nmbd -p 1
+define service{
+	use				services-mandala-template
+        service_description             206 NMBD Procs
+        check_command                   check_nrpe_1arg!206
+	host_name
+	register                        0
+	}
+#command[207]=/usr/lib/nagios/plugins/check_procs -c 1:1 -C smbd -p 1
+define service{
+	use				services-mandala-template
+        service_description             207 SMBD Procs
+        check_command                   check_nrpe_1arg!207
+	host_name
+	register                        0
+	}
+#command[208]=/usr/lib/nagios/plugins/check_users -w 5 -c 10
+define service{
+	use				services-mandala-template
+        service_description             208 Logged in Users
+        check_command                   check_nrpe_1arg!208
+	host_name			mintos
+	}
+#command[209]=/usr/lib/nagios/plugins/check_users -w 20 -c 50
+define service{
+	use				services-mandala-template
+        service_description             209 Logged in Users
+        check_command                   check_nrpe_1arg!209
+	host_name
+	register                        0
+	}
+#command[210]=/usr/lib/nagios/plugins/check_procs -w 50 -c 100
+define service{
+	use				services-mandala-template
+        service_description             210 Procs Lite
+        check_command                   check_nrpe_1arg!210
+	host_name
+	register                        0
+	}
+#command[211]=/usr/lib/nagios/plugins/check_procs -w 200 -c 400
+define service{
+	use				services-mandala-template
+        service_description             211 Procs Medium
+        check_command                   check_nrpe_1arg!211
+	host_name			mintos
+	}
+#command[212]=/usr/lib/nagios/plugins/check_procs -w 300 -c 500
+define service{
+	use				services-mandala-template
+        service_description             212 Procs Heavy
+        check_command                   check_nrpe_1arg!212
+	host_name
+	register                        0
+	}
+
+#command[213]=/usr/lib/nagios/plugins/check_procs -w 5 -c 10 -s Z
+define service{
+	use				services-mandala-template
+        service_description             213 Zombie Procs
+        check_command                   check_nrpe_1arg!213
+	host_name			mintos
+	}
+#command[214]=/usr/local/sbin/check_md_raid
+define service{
+        use                             services-mandala-template
+        service_description             214 Software MD raid
+        check_command                   check_nrpe_1arg!214
+        host_name                       
+	register                        0
+        }
+#command[215]=/usr/lib/nagios/plugins/check_disk -w 5% -c 2% -p /boot
+define service{
+        use                             services-mandala-template
+        service_description             215 /boot f/s free space
+        check_command                   check_nrpe_1arg!215
+        host_name                       
+	register                        0
+        }
+#command[216]=/usr/lib/nagios/plugins/check_disk -w 10% -c 5% -p /
+define service{
+        use                             services-mandala-template
+        service_description             216 Large root f/s
+        check_command                   check_nrpe_1arg!216
+        host_name                       
+	register                        0
+        }
+
+#command[217]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /db
+define service{
+        use                             services-mandala-template
+        service_description             217 /db free space
+        check_command                   check_nrpe_1arg!217
+        host_name                       
+	register                        0
+        }
+#command[218]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /db_backup
+define service{
+        use                             services-mandala-template
+        service_description             218 /db_backup free space
+        check_command                   check_nrpe_1arg!218
+        host_name                       
+	register                        0
+        }
+#command[219]=/usr/lib/nagios/plugins/check_load -w 15,10,5 -c 30,25,20
+define service{
+        use                             services-mandala-template
+        service_description             219 Average Load
+        check_command                   check_nrpe_1arg!219
+        host_name                       
+	register                        0
+        }
+#command[220]=/usr/lib/nagios/plugins/check_load -w 30,20,15 -c 50,40,30
+define service{
+        use                             services-mandala-template
+        service_description             220 Heavy Load
+        check_command                   check_nrpe_1arg!220
+        host_name                       
+	register                        0
+        }
+#command[221]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /home
+define service{
+        use                             services-mandala-template
+        service_description             221 /home free space
+        check_command                   check_nrpe_1arg!221
+        host_name                       
+	register                        0
+        }
+#command[222]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /var
+define service{
+        use                             services-mandala-template
+        service_description             222 /var free space
+        check_command                   check_nrpe_1arg!222
+        host_name                       
+	register                        0
+        }
+#command[223]=/usr/lib/nagios/plugins/check_procs -w 1:1 -C gfy-job-daemon
+define service{
+        use                             services-mandala-template
+        service_description             223 GFY Job Daemon
+        check_command                   check_nrpe_1arg!223
+        host_name                       
+	register                        0
+        }
+#command[224]=/usr/lib/nagios/plugins/check_procs -c -c 1:1 -C cron -p 1
+define service{
+        use                             services-mandala-template
+        service_description             224 Cron
+        check_command                   check_nrpe_1arg!224
+        host_name                       
+	register                        0
+        }
+#command[225]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /var/www
+define service{
+        use                             services-mandala-template
+        service_description             225 /var/www free space
+        check_command                   check_nrpe_1arg!225
+        host_name                       
+	register                        0
+	}
+#command[226]=/usr/local/sbin/check_serveraid_drives.py
+define service{
+        use                             services-mandala-template
+        service_description             226 IBM Int Raid
+        check_command                   check_nrpe_1arg!226
+        host_name                       
+	register                        0
+	}
+#command[227]=/usr/lib/nagios/plugins/check_procs -c 1:1 -C sge_qmaster
+define service{
+        use                             services-mandala-template
+        service_description             227 SGE qmaster daemon
+        check_command                   check_nrpe_1arg!227
+        host_name                       
+	register                        0
+	}
+
+#command[228]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /lab
+define service{
+        use                             services-mandala-template
+        service_description             228 /lab free space
+        check_command                   check_nrpe_1arg!228
+        host_name                       
+	register                        0
+	}
+#command[229]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10% -p /data
+define service{
+        use                             services-mandala-template
+        service_description             229 /data free space
+        check_command                   check_nrpe_1arg!229
+        host_name                       
+	register                        0
+	}
+#command[230]=/usr/local/sbin/check_quota_enhanced.pl --group --upper_cutoff 200048 --lower_cutoff 1024 --filesystem /d0 --filesystem /d1
+define service{
+        use                             services-mandala-template
+        service_description             230 Group Quota
+        check_command                   check_nrpe_1arg!230
+        host_name                       
+	register                        0
+	}
+#command[231]=/usr/lib/nagios/plugins/check_disk -w 5% -c 2% -p /nmr-export
+define service{
+        use                             services-mandala-template
+        service_description             231 /nmr-export free space
+        check_command                   check_nrpe_1arg!231
+        host_name                       
+	register                        0
+	}
+# check nfsd
+#command[232]=/usr/lib/nagios/plugins/check_procs -c 12:24 -C nfsd -p 2
+define service{
+        use                             services-mandala-template
+        service_description             232 NFS daemon
+        check_command                   check_nrpe_1arg!232
+        host_name                       
+	register                        0
+	}
+#command[233]=/usr/lib/nagios/plugins/check_smtp -H localhost
+define service{
+        use                             services-mandala-template
+        service_description             233 SMTP Server
+        check_command                   check_nrpe_1arg!233
+        host_name                       
+	register                        0
+	}
+# IMAP daemon
+#command[234]=/usr/lib/nagios/plugins/check_procs -c 1: -C imapd
+define service{
+        use                             services-mandala-template
+        service_description             234 IMAP Daemon
+        check_command                   check_nrpe_1arg!234
+        host_name                       
+	register                        0
+	}
+# netstat -an | grep WAIT | wc -l
+#command[235]=/usr/lib/nagios/plugins/check_wait.pl --cutoff 40
+define service{
+        use                             services-mandala-template
+        service_description             235 Netstat WAIT
+        check_command                   check_nrpe_1arg!235
+        host_name                       
+	register                        0
+	}
+#Mail scanner
+#command[236]=/usr/lib/nagios/plugins/check_procs -w 20: -c 5: -C MailScanner
+define service{
+        use                             services-mandala-template
+        service_description             236 Mail Scanner procs
+        check_command                   check_nrpe_1arg!236
+        host_name                       
+	register                        0
+	}
+# AntiVirus scan
+#command[237]=/usr/lib/nagios/plugins/check_procs -c 1: -C clamd
+define service{
+        use                             services-mandala-template
+        service_description             237 AntiVirus daemon
+        check_command                   check_nrpe_1arg!237
+        host_name
+        register                        0
+        }
+# Solaris zpool check
+#command[238]=/usr/lib/nagios/plugins/check_zpools
+define service{
+        use                             services-mandala-template
+        service_description             238 ZFS pools
+        check_command                   check_nrpe_1arg!238
+        host_name
+        register                        0
+        }
+#wqcg backup daemon
+#command[239]=/usr/lib/nagios/plugins/check_procs --argument-array=wqb2d -c 1:1 -p 1
+define service{
+        use                             services-mandala-template
+        service_description             239 Backup daemon wqb2d
+        check_command                   check_nrpe_1arg!239
+        host_name
+        register                        0
+        }
+#command[240]=/usr/lib/nagios/plugins/check_disk -w 5% -c 2% -p /dsu0
+define service{
+        use                             services-mandala-template
+        service_description             240 /dsu0 f/s free
+        check_command                   check_nrpe_1arg!240
+        host_name
+        register                        0
+        }
+# check for failed backups
+#command[241]=/usr/local/sbin/check_failed_backups.sh
+define service{
+        use                             services-mandala-template
+        service_description             241 Failed backups
+        check_command                   check_nrpe_1arg!241
+        host_name
+        register                        0
+        }
+# LDAP
+#command[242]=/usr/lib/nagios/plugins/check_procs -c 1 -C slapd -p 1
+define service{
+        use                             services-mandala-template
+        service_description             242 LDAP Service
+        check_command                   check_nrpe_1arg!242
+        host_name
+        register                        0
+        }
+
+##################################################
+# 300-399 SNMP services
+#command[300]=check_avtech_humidity1
+define service{
+        use                             services-mandala-template
+        service_description             300 AVTECH Humidity Level
+        check_command                   check_avtech_humidity1!100!100
+        host_name                       
+	register                        0
+}
+#command[301]=check_avtech_temp1
+define service{
+        use                             services-mandala-template
+        service_description             301 AVTECH Room Temperature
+        check_command                   check_avtech_temp1!50:79!48:84
+        host_name                       
+	register                        0
+}
+#command[302]=check_avtech_temp2
+define service{
+        use                             services-mandala-template
+        service_description             302 AVTECH chilled water temp
+        check_command                   check_avtech_temp2!40:80!35:85
+        host_name                       
+	register                        0
+}
+#command[303]=check_ud_humidity1
+define service{
+        use                             services-mandala-template
+        service_description             303 UD Humidity Level
+        check_command                   check_ud_humidity1!100!100
+        host_name                       
+	register                        0
+}
+#command[304]=check_ud_temp1
+define service{
+        use                             services-mandala-template
+        service_description             304 UD Temperature
+        check_command                   check_ud_temp1!50:78!48:83
+        host_name
+        register                        0
+}
+#
+# 400-499 Range
+#
+
+define service{
+        use                             services-mandala-template
+        service_description             400 httpd daemon
+        check_command                   check_http 
+        host_name                       
+	register                        0
+        }
+
+#command[401]=/usr/lib/nagios/plugins/check_mysql -u mysql
+define service{
+        use                             services-mandala-template
+        service_description             401 MySQL mendon 
+        check_command                   check_nrpe_1arg!401
+        host_name                       
+	register                        0
+        }
+#command[402]=/usr/lib/nagios/plugins/check_mysql -u nagios --password='nagios' -d nagdb
+define service{
+        use                             services-mandala-template
+        service_description             402 MySQL
+        check_command                   check_nrpe_1arg!402
+        host_name                       
+	register                        0
+        }
+#command[402-1]=/usr/lib/nagios/plugins/check_mysql -u nagios --password='nagios'
+define service{
+        use                             services-mandala-template
+        service_description             402-1 MySQL
+        check_command                   check_nrpe_1arg!402-1
+        host_name                       
+	register                        0
+        }
+
+#command[402-2]=/usr/lib/nagios/plugins/check_mysql -u nagios --password='' -d nagdb
+define service{
+        use                             services-mandala-template
+        service_description             402-2 MySQL
+        check_command                   check_nrpe_1arg!402-2
+        host_name                       
+	register                        0
+        }
+#command[402-3]=/usr/lib/nagios/plugins/check_mysql -u confluence -p ziXeech3
+define service{
+        use                             services-mandala-template
+        service_description             402-3 MySQL
+        check_command                   check_nrpe_1arg!402-3
+        host_name                       
+	register                        0
+        }
+
+################################
+# 600-699: services using PASSIVE check
+# check B server zpools
+#command[600]=/usr/lib/nagios/plugins/check_status_file /root/from_mirror/var/adm/zpools
+define service{
+        use                             services-mandala-template
+        service_description             600 B server ZFS pools
+        check_command                   check_nrpe_1arg!600
+        host_name
+        register                        0
+        }
+# check B server maga raids
+#command[601]=/usr/lib/nagios/plugins/check_status_file /root/from_mirror/var/adm/megaraid.int
+define service{
+        use                             services-mandala-template
+        service_description             601 B server megaraid-int
+        check_command                   check_nrpe_1arg!601
+        host_name
+        register                        0
+        }
+#command[602]=/usr/lib/nagios/plugins/check_status_file /root/from_mirror/var/adm/megaraid.ext
+define service{
+        use                             services-mandala-template
+        service_description             602 B server megaraid-ext
+        check_command                   check_nrpe_1arg!602
+        host_name
+        register                        0
+        }
+# check B server wqb2d daemon
+#command[603]=/usr/lib/nagios/plugins/check_status_file /root/from_mirror/var/adm/wqb2d_status
+define service{
+        use                             services-mandala-template
+        service_description             603 B server wqb2d daemon
+        check_command                   check_nrpe_1arg!603
+        host_name
+        register                        0
+        }
+# check B server alive
+#command[604]=/usr/lib/nagios/plugins/check_ping -H 192.168.1.2 -w 300,100% -c 500,100%
+define service{
+        use                             services-mandala-template
+        service_description             604 B server host alive
+        check_command                   check_nrpe_1arg!604
+        host_name
+        register                        0
+        }
